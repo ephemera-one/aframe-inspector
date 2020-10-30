@@ -70,9 +70,15 @@ export default class Toolbar extends React.Component {
    */
   writeChanges = () => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:51234/save');
+    xhr.open('POST', '/save');
+    const errorSring = "Your changes wasn't saved correctly";
     xhr.onerror = () => {
-      alert('aframe-watcher not running. This feature requires a companion service running locally. npm install aframe-watcher to save changes back to file. Read more at supermedium.com/aframe-watcher');
+      alert(errorSring);
+    };
+    xhr.onloadend = () => {
+      if (xhr.status === 404 || xhr.status === 500) {
+        alert(errorSring);
+      }
     };
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(AFRAME.INSPECTOR.history.updates));
@@ -81,15 +87,15 @@ export default class Toolbar extends React.Component {
   toggleScenePlaying = () => {
     if (this.state.isPlaying) {
       AFRAME.scenes[0].pause();
-      this.setState({isPlaying: false});
+      this.setState({ isPlaying: false });
       AFRAME.scenes[0].isPlaying = true;
       document.getElementById('aframeInspectorMouseCursor').play();
       return;
     }
     AFRAME.scenes[0].isPlaying = false;
     AFRAME.scenes[0].play();
-    this.setState({isPlaying: true});
-  }
+    this.setState({ isPlaying: true });
+  };
 
   render() {
     const watcherClassNames = classnames({
@@ -109,15 +115,24 @@ export default class Toolbar extends React.Component {
           />
           <a
             id="playPauseScene"
-            className={'button fa ' + (this.state.isPlaying ? 'fa-pause' : 'fa-play')}
+            className={
+              'button fa ' + (this.state.isPlaying ? 'fa-pause' : 'fa-play')
+            }
             title={this.state.isPlaying ? 'Pause scene' : 'Resume scene'}
-            onClick={this.toggleScenePlaying}>
-          </a>
+            onClick={this.toggleScenePlaying}
+          ></a>
           <a
             className="gltfIcon"
             title="Export to GLTF"
-            onClick={this.exportSceneToGLTF}>
-            <img src={process.env.NODE_ENV === 'production' ? 'https://aframe.io/aframe-inspector/assets/gltf.svg' : '../assets/gltf.svg'} />
+            onClick={this.exportSceneToGLTF}
+          >
+            <img
+              src={
+                process.env.NODE_ENV === 'production'
+                  ? 'https://aframe.io/aframe-inspector/assets/gltf.svg'
+                  : '../assets/gltf.svg'
+              }
+            />
           </a>
           <a
             className={watcherClassNames}
